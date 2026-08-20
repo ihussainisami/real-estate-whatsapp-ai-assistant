@@ -4,6 +4,8 @@ An AI-powered WhatsApp assistant for UK real estate agencies. It handles propert
 
 Built with **n8n**, **Google Gemini**, **WhatsApp Business Cloud API**, **Airtable**, and **Google Calendar**.
 
+![Workflow Diagram](./Real%20Estate%20WhatsApp%20AI%20Assistant.png)
+
 ## What it does
 
 - Answers property questions (price, bedrooms, EPC rating, pet policy, and so on) using live data from Airtable. It never invents details.
