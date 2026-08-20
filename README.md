@@ -33,3 +33,7 @@ Error paths are handled explicitly. Agent failures trigger a customer-facing fal
 ## Notes
 
 This is a portfolio project built with a synthetic property dataset and a test WhatsApp number, not connected to a live agency. Credentials and account IDs have been stripped from the exported workflow JSON.
+
+## Demo
+
+[Watch the walkthrough](https://drive.google.com/file/d/1yLW7TFR0mKe8ksVkh0fXr_9Os7YQUaQK/view?usp=sharing)
