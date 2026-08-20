@@ -36,4 +36,4 @@ This is a portfolio project built with a synthetic property dataset and a test W
 
 ## Demo
 
-[Watch the walkthrough](https://drive.google.com/file/d/1yLW7TFR0mKe8ksVkh0fXr_9Os7YQUaQK/view?usp=sharing)
+[See it in action](https://drive.google.com/file/d/1yLW7TFR0mKe8ksVkh0fXr_9Os7YQUaQK/view?usp=sharing)
