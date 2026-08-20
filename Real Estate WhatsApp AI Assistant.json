@@ -1,0 +1,1022 @@
+{
+  "name": "Real Estate WhatsApp AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": [
+            "delivered"
+          ]
+        }
+      },
+      "id": "",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        512
+      ],
+      "webhookId": "",
+      "notesInFlow": false,
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.input_text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a professional, warm WhatsApp assistant for a UK real estate agency. Today's date is {{ $now.toFormat('cccc, dd LLLL yyyy') }} ({{ $now.toISO() }}), timezone Europe/London. You reply to customers over WhatsApp.\n\nPRIMARY OBJECTIVES\n1. Help users find properties.\n2. Answer property-related questions using live property data.\n3. Qualify leads.\n4. Book viewings.\n5. Escalate high-intent leads.\n6. Never invent property information.\n\nCONVERSATION FLOW (in order):\n1. If the message is a greeting or vague (\"hi\", \"hello\", \"?\", \"I need help\"), respond warmly and ask ONE clarifying question (buying or renting? which area?). Set lead_status = \"WARM\". Do NOT escalate.\n2. Only answer specific questions after the customer has asked something concrete.\n\nPROPERTY LOOKUP RULES:\nWhenever a customer asks about property availability, price, rent, bedrooms, bathrooms, location, furnished status, EPC rating, Council Tax Band, features, pets policy, or viewing availability — USE the Airtable property database tool first. It is the single source of truth.\nIf the customer is looking for a property but does not specify an exact property name, search Airtable using their stated requirements (area, bedrooms, property type, budget, or listing type) and suggest the most relevant matches.\nWhen a customer asks for available properties, provide a maximum of 3 matching properties and briefly summarize each one (e.g. area, price/rent, bedrooms, one standout feature).\nWhen answering questions about pets, only use information retrieved from Airtable — never assume a property is pet-friendly.\nNever invent property prices, availability, viewing times, EPC ratings, property details, or agent information.\nIf a specifically requested property is not found in Airtable, proactively search for similar alternatives (same area or property type) before escalating, and offer them to the customer if any exist. If no alternatives exist or information is unavailable, tell the user, offer to connect them with a specialist, and set escalate = true.\n\nLEAD QUALIFICATION (gather naturally, ONE question at a time — never interrogate):\n- Buying or renting?\n- Preferred area?\n- Budget range?\n- Timeline: just browsing, 1-3 months, or ready now?\nClassify:\n- lead_status = \"HOT\": ready to move/buy now, requests a viewing, or strong confirmed intent with budget shared. Also set escalate = true.\n- lead_status = \"WARM\": actively engaged, planning within a few months, or still qualifying.\n- lead_status = \"COLD\": browsing only, no timeline, no serious intent.\n\nHOT LEAD PRIORITY:\n- When a lead becomes HOT, before escalating, actively try to secure a viewing appointment in the same conversation — ask for their preferred property, date, and time if not already known, then use check_availability and book_appointment.\n- Set escalate = true regardless of whether an appointment was booked. If booked, mention in your reply that a specialist will follow up to confirm details. If they're not ready to schedule, that's fine — still escalate.\n- Once escalate = true, do not ask further unrelated qualifying questions (like exact budget) — that becomes the human specialist's job.\n\nVIEWING APPOINTMENTS:\n- Viewing duration: 45 minutes.\n- Business hours: Monday–Saturday, 9:00 AM–7:00 PM.\n- Always use check_availability before confirming. Never promise a slot before checking.\n- If the requested slot is unavailable, do NOT book automatically. Tell the customer the slot is taken, suggest 1-2 nearby available times, and wait for them to confirm their preferred option before calling book_appointment.\n- IDEMPOTENCY: Before calling book_appointment, check the conversation history. If an appointment for this property has already been confirmed earlier in this conversation, do NOT create a new booking — instead, remind the customer of the existing confirmed time (e.g. \"You're already booked for Friday at 5 PM — would you like to change this?\"). Only call book_appointment again if the customer explicitly asks to change, reschedule, or cancel the existing appointment.\n\nESCALATION (set escalate = true and tell the customer a human specialist will follow up):\n- Any HOT lead.\n- Legal questions, complaints, mortgage advice requests, or an explicit request to speak to a human.\n- Requested property cannot be found in Airtable (after checking for alternatives).\n\nANTI-HALLUCINATION:\n- Answer general process/compliance FAQs using ONLY the knowledge base below. Never invent legal advice, tax figures, or details not stated here.\n- If something is outside the knowledge base or requires an exact up-to-date figure (e.g. current Stamp Duty rates), say you'll connect them with a specialist and set escalate = true.\n\nKNOWLEDGE BASE (general UK property FAQs — answer in the customer's language: English, Urdu, or Hinglish):\n- Services: help buyers and tenants find properties, schedule viewings, connect with mortgage brokers/solicitors, and guide the process from offer to completion.\n- Estate agent fees: in the UK, the seller typically pays the estate agent's commission, not the buyer.\n- Tenant fees: under the Tenant Fees Act 2019, letting agents cannot charge tenants most fees; holding deposits are capped at one week's rent.\n- Deposit protection: landlords must protect a tenant's deposit in a government-approved scheme within 30 days of receiving it.\n- Freehold vs Leasehold: freehold means owning the building and land outright; leasehold means owning the property for a fixed lease term, usually with ground rent and/or service charges.\n- EPC rating: Energy Performance Certificate rated A (most efficient) to G; required for most sales and lettings.\n- Council Tax Band: a local tax band (A–H) based on property value, separate from rent or mortgage.\n- Conveyancing process: 1) offer accepted 2) instruct a solicitor/conveyancer 3) searches and survey 4) mortgage offer finalised 5) exchange contracts 6) completion.\n- Typical timeline: exchange to completion commonly takes 8-12 weeks, though it varies by chain length.\n- Surveys: Level 1 (Condition Report), Level 2 (HomeBuyer Report), Level 3 (Full Building Survey) — recommended before exchange.\n- Gazumping: in England and Wales, a seller can legally accept a higher offer any time before contracts are exchanged; nothing is binding until exchange.\n- Mortgage Agreement in Principle (AIP): not required to view a property, but having one strengthens an offer; we can connect buyers with trusted mortgage brokers.\n- Stamp Duty Land Tax (SDLT): a tax paid by buyers on property purchases above a threshold; exact rates and thresholds change and are not covered here — for a current figure, we'll connect you with a specialist.\n- Equality Act 2010: prohibits discrimination in housing based on race, religion, sex, disability, or other protected characteristics; we never make recommendations based on protected characteristics.\n- Minimum tenancy: typically a 6 or 12-month Assured Shorthold Tenancy (AST), though terms vary by property.\n- Foreign buyers/tenants: welcome; financing and tax treatment can differ for non-UK residents — for specifics, we'll connect you with a specialist.\n\nSTYLE:\nWhatsApp style. Friendly, professional, concise. Avoid long paragraphs. Ask one question at a time.\n\nOUTPUT FORMAT:\nReturn the structured object. \"reply\" is the WhatsApp message the customer sees (never include internal tags or lead status in it). \"lead_summary\" is a short 1-2 sentence internal summary of the lead for the human agent (e.g. \"Looking for 3-bed house in Bristol, budget £400-450k, ready to move within a month\"). Only place customer-facing text inside \"reply\".\n{\n  \"reply\": \"\",\n  \"lead_status\": \"HOT|WARM|COLD\",\n  \"lead_summary\": \"\",\n  \"escalate\": false,\n  \"appointment_requested\": false\n}\nAlways express appointment times with explicit timezone offset (Europe/London) when calling book_appointment.\nGROUND TRUTH: Never treat your own earlier messages in this conversation as proof \nthat a booking exists. Before confirming, rescheduling, or referencing any existing \nappointment, always re-verify using check_availability against the calendar — the \ncalendar is the single source of truth, not what you said earlier. If a previously \nmentioned booking is no longer found in the calendar, treat the customer's request \nas a new booking.\nCONTEXT RESOLUTION: If the customer uses a pronoun or vague reference (\"it\", \"this \none\", \"that property\") and only one property has been discussed so far in the \nconversation, assume they mean that property — do not ask which property unless \nmore than one has genuinely been mentioned.",
+          "maxIterations": 10,
+          "enableStreaming": false
+        }
+      },
+      "id": "",
+      "name": "Real Estate Assistant",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1056,
+        64
+      ],
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "",
+      "name": "Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        352
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=demo-session-{{ $now.toMillis() }}",
+        "contextWindowLength": 15
+      },
+      "id": "",
+      "name": "Per-User Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        976,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get availability in a calendar in Google Calendar",
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "timeMin": "={{ $fromAI('Start_Time', 'Start of requested time window in ISO format', 'string') }}",
+        "timeMax": "={{ $fromAI('End_Time', 'End of the requested time window in ISO 8601 format', 'string') }}",
+        "options": {
+          "outputFormat": "availability"
+        }
+      },
+      "id": "",
+      "name": "check_availability",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        592
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an event in Google Calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "start": "={{ $fromAI('Start', 'Appointment start date and time in ISO 8601 format', 'string') }}",
+        "end": "={{ $fromAI('End', 'Appointment end date and time in ISO 8601 format', 'string') }}",
+        "additionalFields": {
+          "description": "={{ $fromAI('Description', `Details: client name, phone, property of interest, and any notes`, 'string') }}",
+          "location": "={{ $fromAI('Location', 'Property address or meeting location in the UK (e.g., London, Manchester)', 'string') }}",
+          "summary": "={{ $fromAI('Summary', 'Short title for the viewing appointment, e.g., Property Viewing - 123 Main St', 'string') }}"
+        }
+      },
+      "id": "",
+      "name": "book_appointment",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        592
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"reply\": \"Hi! I would be happy to help you find your next home. Are you looking to buy soon, or just exploring the market?\",\n  \"lead_status\": \"WARM\",\n  \"escalate\": false,\n  \"appointment_requested\": false,\n  \"lead_summary\": \"Inquiring about home buying timelines and general property availability.\"\n}"
+      },
+      "id": "",
+      "name": "Lead Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1488,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $('Real Estate Assistant').item.json.output.reply.replace(/\\\\n|\\n/g, '\\n') }}",
+        "additionalFields": {}
+      },
+      "id": "",
+      "name": "Send WhatsApp Reply",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1728,
+        48
+      ],
+      "webhookId": "",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User ID": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "User Name": "={{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}",
+            "Question": "={{ $('Normalize Input Text').item.json.input_text }}",
+            "AI Answer": "={{ $('Real Estate Assistant').item.json.output.reply }}",
+            "Escalated": "={{ $('Real Estate Assistant').item.json.output.escalate }}",
+            "lead_status": "={{ $json.output.lead_status }}",
+            "appointment_requested": "={{ $json.output.appointment_requested }}",
+            "Lead Summary": "={{ $json.output.lead_summary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "User ID",
+              "displayName": "User ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User Name",
+              "displayName": "User Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question",
+              "displayName": "Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Answer",
+              "displayName": "AI Answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Escalated",
+              "displayName": "Escalated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_status",
+              "displayName": "lead_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_requested",
+              "displayName": "appointment_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Summary",
+              "displayName": "Lead Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "",
+      "name": "Log Lead to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1760,
+        448
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "is-hot",
+              "leftValue": "={{ $('Real Estate Assistant').item.json.output.lead_status }}",
+              "rightValue": "HOT",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "is-escalate",
+              "leftValue": "={{ $('Real Estate Assistant').item.json.output.escalate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "",
+      "name": "Hot Lead or Escalation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1776,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "",
+        "textBody": "=🚨 *Lead needs attention* ({{ $('Real Estate Assistant').item.json.output.lead_status }})\n\nName:\n{{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}\n\nPhone:\n{{ $('WhatsApp Trigger').item.json.messages[0].from }}\n\nLead Summary:\n{{ $('Real Estate Assistant').item.json.output.lead_summary }}\n\nCustomer Message:\n{{ $('Normalize Input Text').item.json.input_text }}\n\nAppointment Requested:\n{{ $('Real Estate Assistant').item.json.output.appointment_requested }}\n\nAI Reply:\n{{ $('Real Estate Assistant').item.json.output.reply }}",
+        "additionalFields": {}
+      },
+      "id": "",
+      "name": "Notify Agent (Escalation)",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2256,
+        624
+      ],
+      "webhookId": "",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "Thanks for your message! I can currently help best over text. Please type your question and I will assist you right away. 🏡",
+        "additionalFields": {}
+      },
+      "id": "",
+      "name": "Send Unsupported Notice",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        720
+      ],
+      "webhookId": "",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.messages[0].audio.id }}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        496
+      ],
+      "id": "",
+      "name": "Get Audio File",
+      "webhookId": "",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "inputType": "binary",
+        "options": {
+          "maxOutputTokens": 300
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        848,
+        688
+      ],
+      "id": "",
+      "name": "Analyze audio",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "",
+              "leftValue": "={{ $json.messages[0].from }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        96,
+        512
+      ],
+      "id": "",
+      "name": "Is Valid Message?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": ""
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "",
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        480
+      ],
+      "id": "",
+      "name": "Route by Message Type"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "input_text",
+              "value": "={{ $json.messages?.[0]?.text?.body || $json.content || $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        64
+      ],
+      "id": "",
+      "name": "Normalize Input Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "",
+              "name": "Response",
+              "value": "Our team will contact you as soon as possible.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1728,
+        240
+      ],
+      "id": "",
+      "name": "Fallback Reply Text"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ ($('Real Estate Assistant').item.json.output.reply || \"Sorry, could you rephrase that for me?\").replace(/\\\\n|\\n/g, '\\n') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2208,
+        240
+      ],
+      "id": "",
+      "name": "Send Fallback Reply to Customer",
+      "webhookId": "",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Get Audio File\"].json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        736,
+        496
+      ],
+      "id": "",
+      "name": "Download Audio Binary",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Search records in AirtableWhen searching properties, use the search_properties tool whenever the user mentions:\n\n- Area\n- Bedrooms\n- Bathrooms\n- Budget\n- Buying\n- Renting\n- Property type\n\nDo not wait for an exact property name.\nProperty searches must use the search_properties tool.\nDo not answer property search requests from memory.\nIf a specifically requested property is not found in Airtable, proactively search \nfor similar alternatives (same area or property type) before escalating, and \noffer them to the customer if any exist.",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Real Estate Database",
+          "cachedResultUrl": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Properties",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        432
+      ],
+      "id": "",
+      "name": "search_properties",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.notifiedUsers) staticData.notifiedUsers = {};\n\nconst messages = $('WhatsApp Trigger').item.json.messages || [];\nconst phone = messages[0]?.from;\nconst now = Date.now();\nconst COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours\n\nif (phone && staticData.notifiedUsers[phone] && (now - staticData.notifiedUsers[phone] < COOLDOWN_MS)) {\n  return []; // notified within last 24h, skip\n}\n\nif (phone) {\n  staticData.notifiedUsers[phone] = now;\n}\n\nreturn [$input.item];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        624
+      ],
+      "id": "",
+      "name": "Deduplicate Escalation"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "",
+        "textBody": "=⚠️ Agent failed for {{ $('WhatsApp Trigger').item.json.messages[0].from }}. Customer got fallback message.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        240
+      ],
+      "id": "",
+      "name": "Notify Developer (Error Alert)",
+      "webhookId": "",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "WhatsApp Trigger": [
+      {
+        "json": {
+          "messaging_product": "whatsapp",
+          "metadata": {
+            "display_phone_number": "",
+            "phone_number_id": ""
+          },
+          "contacts": [
+            {
+              "wa_id": "",
+              "user_id": ""
+            }
+          ],
+          "statuses": [
+            {
+              "id": "",
+              "status": "delivered",
+              "timestamp": "1787104230",
+              "recipient_id": "8",
+              "recipient_user_id": "",
+              "pricing": {
+                "billable": false,
+                "pricing_model": "PMP",
+                "category": "service",
+                "type": "free_customer_service"
+              }
+            }
+          ],
+          "field": "messages"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is Valid Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Real Estate Assistant": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Lead to Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Hot Lead or Escalation?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Reply Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Per-User Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check_availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "book_appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hot Lead or Escalation?": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio File": {
+      "main": [
+        [
+          {
+            "node": "Download Audio Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze audio": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid Message?": {
+      "main": [
+        [
+          {
+            "node": "Route by Message Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Message Type": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Unsupported Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input Text": {
+      "main": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Reply Text": {
+      "main": [
+        [
+          {
+            "node": "Notify Developer (Error Alert)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio Binary": {
+      "main": [
+        [
+          {
+            "node": "Analyze audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_properties": {
+      "ai_tool": [
+        [
+          {
+            "node": "Real Estate Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate Escalation": {
+      "main": [
+        [
+          {
+            "node": "Notify Agent (Escalation)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Developer (Error Alert)": {
+      "main": [
+        [
+          {
+            "node": "Send Fallback Reply to Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "nodeGroups": [],
+  "id": "",
+  "tags": []
+}
