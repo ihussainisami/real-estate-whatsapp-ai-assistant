@@ -1,5 +1,4 @@
 {
-  "name": "Real Estate WhatsApp AI Assistant",
   "nodes": [
     {
       "parameters": {
@@ -12,22 +11,16 @@
           ]
         }
       },
-      "id": "",
+      "id": "8454fd2c-da8b-496a-b780-e8d69af6e176",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
       "typeVersion": 1,
       "position": [
-        -128,
-        512
+        -1888,
+        560
       ],
-      "webhookId": "",
-      "notesInFlow": false,
-      "credentials": {
-        "whatsAppTriggerApi": {
-          "id": "",
-          "name": "WhatsApp OAuth account"
-        }
-      }
+      "webhookId": "f7e9cb69-7aaa-4975-8fcc-3f14f578fdde",
+      "notesInFlow": false
     },
     {
       "parameters": {
@@ -35,18 +28,18 @@
         "text": "={{ $json.input_text }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=You are a professional, warm WhatsApp assistant for a UK real estate agency. Today's date is {{ $now.toFormat('cccc, dd LLLL yyyy') }} ({{ $now.toISO() }}), timezone Europe/London. You reply to customers over WhatsApp.\n\nPRIMARY OBJECTIVES\n1. Help users find properties.\n2. Answer property-related questions using live property data.\n3. Qualify leads.\n4. Book viewings.\n5. Escalate high-intent leads.\n6. Never invent property information.\n\nCONVERSATION FLOW (in order):\n1. If the message is a greeting or vague (\"hi\", \"hello\", \"?\", \"I need help\"), respond warmly and ask ONE clarifying question (buying or renting? which area?). Set lead_status = \"WARM\". Do NOT escalate.\n2. Only answer specific questions after the customer has asked something concrete.\n\nPROPERTY LOOKUP RULES:\nWhenever a customer asks about property availability, price, rent, bedrooms, bathrooms, location, furnished status, EPC rating, Council Tax Band, features, pets policy, or viewing availability — USE the Airtable property database tool first. It is the single source of truth.\nIf the customer is looking for a property but does not specify an exact property name, search Airtable using their stated requirements (area, bedrooms, property type, budget, or listing type) and suggest the most relevant matches.\nWhen a customer asks for available properties, provide a maximum of 3 matching properties and briefly summarize each one (e.g. area, price/rent, bedrooms, one standout feature).\nWhen answering questions about pets, only use information retrieved from Airtable — never assume a property is pet-friendly.\nNever invent property prices, availability, viewing times, EPC ratings, property details, or agent information.\nIf a specifically requested property is not found in Airtable, proactively search for similar alternatives (same area or property type) before escalating, and offer them to the customer if any exist. If no alternatives exist or information is unavailable, tell the user, offer to connect them with a specialist, and set escalate = true.\n\nLEAD QUALIFICATION (gather naturally, ONE question at a time — never interrogate):\n- Buying or renting?\n- Preferred area?\n- Budget range?\n- Timeline: just browsing, 1-3 months, or ready now?\nClassify:\n- lead_status = \"HOT\": ready to move/buy now, requests a viewing, or strong confirmed intent with budget shared. Also set escalate = true.\n- lead_status = \"WARM\": actively engaged, planning within a few months, or still qualifying.\n- lead_status = \"COLD\": browsing only, no timeline, no serious intent.\n\nHOT LEAD PRIORITY:\n- When a lead becomes HOT, before escalating, actively try to secure a viewing appointment in the same conversation — ask for their preferred property, date, and time if not already known, then use check_availability and book_appointment.\n- Set escalate = true regardless of whether an appointment was booked. If booked, mention in your reply that a specialist will follow up to confirm details. If they're not ready to schedule, that's fine — still escalate.\n- Once escalate = true, do not ask further unrelated qualifying questions (like exact budget) — that becomes the human specialist's job.\n\nVIEWING APPOINTMENTS:\n- Viewing duration: 45 minutes.\n- Business hours: Monday–Saturday, 9:00 AM–7:00 PM.\n- Always use check_availability before confirming. Never promise a slot before checking.\n- If the requested slot is unavailable, do NOT book automatically. Tell the customer the slot is taken, suggest 1-2 nearby available times, and wait for them to confirm their preferred option before calling book_appointment.\n- IDEMPOTENCY: Before calling book_appointment, check the conversation history. If an appointment for this property has already been confirmed earlier in this conversation, do NOT create a new booking — instead, remind the customer of the existing confirmed time (e.g. \"You're already booked for Friday at 5 PM — would you like to change this?\"). Only call book_appointment again if the customer explicitly asks to change, reschedule, or cancel the existing appointment.\n\nESCALATION (set escalate = true and tell the customer a human specialist will follow up):\n- Any HOT lead.\n- Legal questions, complaints, mortgage advice requests, or an explicit request to speak to a human.\n- Requested property cannot be found in Airtable (after checking for alternatives).\n\nANTI-HALLUCINATION:\n- Answer general process/compliance FAQs using ONLY the knowledge base below. Never invent legal advice, tax figures, or details not stated here.\n- If something is outside the knowledge base or requires an exact up-to-date figure (e.g. current Stamp Duty rates), say you'll connect them with a specialist and set escalate = true.\n\nKNOWLEDGE BASE (general UK property FAQs — answer in the customer's language: English, Urdu, or Hinglish):\n- Services: help buyers and tenants find properties, schedule viewings, connect with mortgage brokers/solicitors, and guide the process from offer to completion.\n- Estate agent fees: in the UK, the seller typically pays the estate agent's commission, not the buyer.\n- Tenant fees: under the Tenant Fees Act 2019, letting agents cannot charge tenants most fees; holding deposits are capped at one week's rent.\n- Deposit protection: landlords must protect a tenant's deposit in a government-approved scheme within 30 days of receiving it.\n- Freehold vs Leasehold: freehold means owning the building and land outright; leasehold means owning the property for a fixed lease term, usually with ground rent and/or service charges.\n- EPC rating: Energy Performance Certificate rated A (most efficient) to G; required for most sales and lettings.\n- Council Tax Band: a local tax band (A–H) based on property value, separate from rent or mortgage.\n- Conveyancing process: 1) offer accepted 2) instruct a solicitor/conveyancer 3) searches and survey 4) mortgage offer finalised 5) exchange contracts 6) completion.\n- Typical timeline: exchange to completion commonly takes 8-12 weeks, though it varies by chain length.\n- Surveys: Level 1 (Condition Report), Level 2 (HomeBuyer Report), Level 3 (Full Building Survey) — recommended before exchange.\n- Gazumping: in England and Wales, a seller can legally accept a higher offer any time before contracts are exchanged; nothing is binding until exchange.\n- Mortgage Agreement in Principle (AIP): not required to view a property, but having one strengthens an offer; we can connect buyers with trusted mortgage brokers.\n- Stamp Duty Land Tax (SDLT): a tax paid by buyers on property purchases above a threshold; exact rates and thresholds change and are not covered here — for a current figure, we'll connect you with a specialist.\n- Equality Act 2010: prohibits discrimination in housing based on race, religion, sex, disability, or other protected characteristics; we never make recommendations based on protected characteristics.\n- Minimum tenancy: typically a 6 or 12-month Assured Shorthold Tenancy (AST), though terms vary by property.\n- Foreign buyers/tenants: welcome; financing and tax treatment can differ for non-UK residents — for specifics, we'll connect you with a specialist.\n\nSTYLE:\nWhatsApp style. Friendly, professional, concise. Avoid long paragraphs. Ask one question at a time.\n\nOUTPUT FORMAT:\nReturn the structured object. \"reply\" is the WhatsApp message the customer sees (never include internal tags or lead status in it). \"lead_summary\" is a short 1-2 sentence internal summary of the lead for the human agent (e.g. \"Looking for 3-bed house in Bristol, budget £400-450k, ready to move within a month\"). Only place customer-facing text inside \"reply\".\n{\n  \"reply\": \"\",\n  \"lead_status\": \"HOT|WARM|COLD\",\n  \"lead_summary\": \"\",\n  \"escalate\": false,\n  \"appointment_requested\": false\n}\nAlways express appointment times with explicit timezone offset (Europe/London) when calling book_appointment.\nGROUND TRUTH: Never treat your own earlier messages in this conversation as proof \nthat a booking exists. Before confirming, rescheduling, or referencing any existing \nappointment, always re-verify using check_availability against the calendar — the \ncalendar is the single source of truth, not what you said earlier. If a previously \nmentioned booking is no longer found in the calendar, treat the customer's request \nas a new booking.\nCONTEXT RESOLUTION: If the customer uses a pronoun or vague reference (\"it\", \"this \none\", \"that property\") and only one property has been discussed so far in the \nconversation, assume they mean that property — do not ask which property unless \nmore than one has genuinely been mentioned.",
+          "systemMessage": "=You are a professional WhatsApp assistant for a UK real estate agency. Today's date is {{ $now.toFormat('cccc, dd LLLL yyyy') }} ({{ $now.toISO() }}), timezone Europe/London.\n\nOBJECTIVES: Help users find properties. Qualify leads. Book viewings. Escalate high intent leads. Never invent information.\n\nGREETINGS: For vague messages (\"hi\", \"hello\", \"I need help\"), respond warmly and ask one question: buying or renting, and which area. Set lead_status = \"WARM\". Do not escalate.\n\nLEAD QUALIFICATION: Ask one question at a time. Cover: buying or renting, area, budget, timeline.\nHOT: ready now, requests a viewing, or confirmed intent with budget shared. Set escalate = true.\nWARM: engaged, planning within months, or still qualifying.\nCOLD: browsing only, no timeline.\nOnce escalate = true, before securing a viewing stop asking unrelated questions like budget.\n\nCONTEXT: If the customer uses \"it\" or \"this one\" and only one property has been discussed, assume that property.\n\nESCALATION: Set escalate = true for any HOT lead, legal or mortgage advice requests, complaints, explicit human requests, or a property that cannot be found after checking alternatives.\n\nANTI-HALLUCINATION: Answer general FAQs only from the knowledge base below. For anything outside it, or figures that change over time like Stamp Duty rates, say you'll connect them with a specialist and set escalate = true.\n\nKNOWLEDGE BASE:\nServices: help buyers and tenants find properties, schedule viewings, connect with mortgage brokers and solicitors, guide the process from offer to completion.\nEstate agent fees: in the UK the seller pays the agent's commission, not the buyer.\nTenant fees: under the Tenant Fees Act 2019, letting agents cannot charge tenants most fees. Holding deposits are capped at one week's rent.\nDeposit protection: landlords must protect a tenant's deposit in a government approved scheme within 30 days.\nFreehold vs Leasehold: freehold means owning the building and land outright. Leasehold means owning for a fixed term, usually with ground rent or service charges.\nEPC rating: Energy Performance Certificate, A to G, required for most sales and lettings.\nCouncil Tax Band: local tax band A to H based on property value, separate from rent or mortgage.\nConveyancing: offer accepted, instruct a solicitor, searches and survey, mortgage offer finalised, exchange contracts, completion.\nTimeline: exchange to completion typically takes 8 to 12 weeks, varies by chain length.\nSurveys: Level 1 Condition Report, Level 2 HomeBuyer Report, Level 3 Full Building Survey, recommended before exchange.\nGazumping: in England and Wales a seller can accept a higher offer any time before exchange. Nothing is binding until then.\nMortgage Agreement in Principle: not required to view a property but strengthens an offer. We can connect buyers with trusted brokers.\nStamp Duty Land Tax: paid by buyers above a threshold. Rates change and are not covered here, connect with a specialist for a current figure.\nEquality Act 2010: prohibits housing discrimination based on protected characteristics. Never recommend based on them.\nMinimum tenancy: typically 6 or 12 month Assured Shorthold Tenancy, varies by property.\nForeign buyers and tenants: welcome. Financing and tax treatment can differ, connect with a specialist for specifics.\n\nSTYLE: WhatsApp style, friendly, professional, concise, one question at a time.\n\nOUTPUT:\n{\"reply\": \"\", \"lead_status\": \"HOT|WARM|COLD\", \"lead_summary\": \"\", \"escalate\": false, \"appointment_requested\": false}\n\"reply\" is customer facing text only. \"lead_summary\" is a one line internal note for the human agent.",
           "maxIterations": 10,
           "enableStreaming": false
         }
       },
-      "id": "",
+      "id": "00fbd2df-f609-45e1-ba6a-eb369e36b593",
       "name": "Real Estate Assistant",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1056,
-        64
+        -704,
+        112
       ],
       "retryOnFail": true,
       "onError": "continueErrorOutput"
@@ -58,40 +51,34 @@
           "temperature": 0.3
         }
       },
-      "id": "",
+      "id": "e241f489-4040-48f2-8625-0277d4380563",
       "name": "Gemini Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        752,
-        352
-      ],
-      "credentials": {
-        "googlePalmApi": {
-          "id": "",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+        -1008,
+        400
+      ]
     },
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "=demo-session-{{ $now.toMillis() }}",
+        "sessionKey": "=real-estate-{{ $json.messages[0].from }}",
         "contextWindowLength": 15
       },
-      "id": "",
+      "id": "af76f99e-3323-426c-93c0-f5a2c75b64d3",
       "name": "Per-User Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        976,
-        352
+        -784,
+        400
       ]
     },
     {
       "parameters": {
         "descriptionType": "manual",
-        "toolDescription": "Get availability in a calendar in Google Calendar",
+        "toolDescription": "Get availability in Google Calendar. Call this before confirming or promising any viewing slot. Business hours are Monday to Saturday, 9 AM to 7 PM. Viewings are 45 minutes.\n\nNever treat your own earlier messages as proof a slot is free. Always check here first, even if a time was mentioned earlier. The calendar is the source of truth.",
         "resource": "calendar",
         "calendar": {
           "__rl": true,
@@ -105,25 +92,19 @@
           "outputFormat": "availability"
         }
       },
-      "id": "",
+      "id": "0da0abe0-a41f-4b02-8d01-6e8f5f20b2cf",
       "name": "check_availability",
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        1040,
-        592
-      ],
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "id": "",
-          "name": "Google Calendar account"
-        }
-      }
+        -720,
+        640
+      ]
     },
     {
       "parameters": {
         "descriptionType": "manual",
-        "toolDescription": "Create an event in Google Calendar",
+        "toolDescription": "Create an event in Google Calendar. Only call this after check_availability confirms the slot is free. If the slot is unavailable, do not book automatically. Tell the customer, suggest one or two nearby times, and wait for confirmation.\n\nBefore calling this, check conversation history. If an appointment for this property was already confirmed, do not create a new booking. Only call again if the customer explicitly asks to change, reschedule, or cancel.\n\nAlways express times with explicit timezone offset, Europe/London.",
         "calendar": {
           "__rl": true,
           "value": "",
@@ -138,57 +119,44 @@
           "summary": "={{ $fromAI('Summary', 'Short title for the viewing appointment, e.g., Property Viewing - 123 Main St', 'string') }}"
         }
       },
-      "id": "",
+      "id": "fd26d0e4-bf93-4cf5-abcf-9539920c93b1",
       "name": "book_appointment",
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        1232,
-        592
-      ],
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "id": "",
-          "name": "Google Calendar account"
-        }
-      }
+        -592,
+        448
+      ]
     },
     {
       "parameters": {
         "jsonSchemaExample": "{\n  \"reply\": \"Hi! I would be happy to help you find your next home. Are you looking to buy soon, or just exploring the market?\",\n  \"lead_status\": \"WARM\",\n  \"escalate\": false,\n  \"appointment_requested\": false,\n  \"lead_summary\": \"Inquiring about home buying timelines and general property availability.\"\n}"
       },
-      "id": "",
+      "id": "316e9c6a-b5b2-48da-b839-b7474c8ff0b6",
       "name": "Lead Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1488,
-        592
+        -272,
+        640
       ]
     },
     {
       "parameters": {
         "operation": "send",
-        "phoneNumberId": "",
         "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
         "textBody": "={{ $('Real Estate Assistant').item.json.output.reply.replace(/\\\\n|\\n/g, '\\n') }}",
         "additionalFields": {}
       },
-      "id": "",
+      "id": "b9eba7fa-131d-49d4-b8c0-c9476f2ba7df",
       "name": "Send WhatsApp Reply",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        1728,
-        48
+        0,
+        96
       ],
-      "webhookId": "",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "webhookId": "47320f1f-109c-42a0-bd0d-be6b00c1b565"
     },
     {
       "parameters": {
@@ -307,22 +275,16 @@
         },
         "options": {}
       },
-      "id": "",
+      "id": "2d426c97-f1af-496d-aa5f-f04a9c3d6fed",
       "name": "Log Lead to Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1760,
-        448
+        0,
+        496
       ],
       "retryOnFail": true,
-      "waitBetweenTries": 3000,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "",
-          "name": "Google Sheets account"
-        }
-      }
+      "waitBetweenTries": 3000
     },
     {
       "parameters": {
@@ -358,62 +320,47 @@
         },
         "options": {}
       },
-      "id": "",
+      "id": "17897649-5ef3-4f7d-a0fd-01a02751f165",
       "name": "Hot Lead or Escalation?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1776,
-        640
+        16,
+        688
       ]
     },
     {
       "parameters": {
         "operation": "send",
-        "phoneNumberId": "",
-        "recipientPhoneNumber": "",
         "textBody": "=🚨 *Lead needs attention* ({{ $('Real Estate Assistant').item.json.output.lead_status }})\n\nName:\n{{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}\n\nPhone:\n{{ $('WhatsApp Trigger').item.json.messages[0].from }}\n\nLead Summary:\n{{ $('Real Estate Assistant').item.json.output.lead_summary }}\n\nCustomer Message:\n{{ $('Normalize Input Text').item.json.input_text }}\n\nAppointment Requested:\n{{ $('Real Estate Assistant').item.json.output.appointment_requested }}\n\nAI Reply:\n{{ $('Real Estate Assistant').item.json.output.reply }}",
         "additionalFields": {}
       },
-      "id": "",
+      "id": "964237d2-8027-436d-8ee0-de3de85094d8",
       "name": "Notify Agent (Escalation)",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        2256,
-        624
+        496,
+        672
       ],
-      "webhookId": "",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "webhookId": "9a6a887a-c379-431d-bfb9-f70f0b3e830f"
     },
     {
       "parameters": {
         "operation": "send",
-        "phoneNumberId": "",
         "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
         "textBody": "Thanks for your message! I can currently help best over text. Please type your question and I will assist you right away. 🏡",
         "additionalFields": {}
       },
-      "id": "",
+      "id": "4294e6f3-d71e-4ed9-8f8e-1abf56b08b5c",
       "name": "Send Unsupported Notice",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        -112,
-        720
+        -1376,
+        832
       ],
-      "webhookId": "",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "webhookId": "74df8bac-ffed-464b-bac7-1de26ce0ca8c"
     },
     {
       "parameters": {
@@ -424,18 +371,12 @@
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        544,
-        496
+        -1216,
+        544
       ],
-      "id": "",
+      "id": "ee7fd754-4860-4514-91ed-1c16c7c19864",
       "name": "Get Audio File",
-      "webhookId": "",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "webhookId": "0bdaf334-3403-4aa4-ba1e-23ce19f29028"
     },
     {
       "parameters": {
@@ -455,17 +396,11 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.2,
       "position": [
-        848,
-        688
+        -912,
+        736
       ],
-      "id": "",
-      "name": "Analyze audio",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+      "id": "840375f9-3ad2-4b67-b830-8ff7f2a288a3",
+      "name": "Analyze audio"
     },
     {
       "parameters": {
@@ -495,10 +430,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        96,
-        512
+        -1664,
+        560
       ],
-      "id": "",
+      "id": "32d7315e-70f5-40f8-bded-d51734cb1cec",
       "name": "Is Valid Message?"
     },
     {
@@ -559,10 +494,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        320,
-        480
+        -1440,
+        528
       ],
-      "id": "",
+      "id": "3dea0725-63dd-490b-9d42-662d04ec3978",
       "name": "Route by Message Type"
     },
     {
@@ -582,10 +517,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        672,
-        64
+        -1088,
+        112
       ],
-      "id": "",
+      "id": "ef4a5b22-436d-4b77-b3f5-b583e2abf92c",
       "name": "Normalize Input Text"
     },
     {
@@ -605,16 +540,15 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1728,
-        240
+        -32,
+        288
       ],
-      "id": "",
+      "id": "e0fc4439-036a-4421-8ef4-baa6da3ec957",
       "name": "Fallback Reply Text"
     },
     {
       "parameters": {
         "operation": "send",
-        "phoneNumberId": "",
         "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
         "textBody": "={{ ($('Real Estate Assistant').item.json.output.reply || \"Sorry, could you rephrase that for me?\").replace(/\\\\n|\\n/g, '\\n') }}",
         "additionalFields": {}
@@ -622,18 +556,12 @@
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        2208,
-        240
+        448,
+        288
       ],
-      "id": "",
+      "id": "f908f859-bb5e-446b-9ef9-3c337cf270a8",
       "name": "Send Fallback Reply to Customer",
-      "webhookId": "",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "webhookId": "e6842598-c129-4c6b-9c27-c5486aff794b"
     },
     {
       "parameters": {
@@ -651,22 +579,16 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        736,
-        496
+        -1104,
+        736
       ],
-      "id": "",
-      "name": "Download Audio Binary",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "id": "3d180445-1fab-428d-993b-79d6702b67d2",
+      "name": "Download Audio Binary"
     },
     {
       "parameters": {
         "descriptionType": "manual",
-        "toolDescription": "Search records in AirtableWhen searching properties, use the search_properties tool whenever the user mentions:\n\n- Area\n- Bedrooms\n- Bathrooms\n- Budget\n- Buying\n- Renting\n- Property type\n\nDo not wait for an exact property name.\nProperty searches must use the search_properties tool.\nDo not answer property search requests from memory.\nIf a specifically requested property is not found in Airtable, proactively search \nfor similar alternatives (same area or property type) before escalating, and \noffer them to the customer if any exist.",
+        "toolDescription": "Search records in Airtable. Use whenever the customer asks about availability, price, rent, bedrooms, bathrooms, location, furnished status, EPC rating, Council Tax Band, features, pets policy, or viewing availability.\n\nIf no exact property name is given, search using stated requirements: area, bedrooms, property type, budget, or listing type.\n\nNever invent prices, availability, EPC ratings, or details this tool did not return. For pet questions, only use what this tool returns.\n\nReturn a maximum of 3 matches, briefly summarized: area, price or rent, bedrooms, one standout feature.\n\nIf a specifically requested property is not found, search for similar alternatives in the same area or type before telling the customer nothing is available.",
         "operation": "search",
         "base": {
           "__rl": true,
@@ -687,17 +609,11 @@
       "type": "n8n-nodes-base.airtableTool",
       "typeVersion": 2.2,
       "position": [
-        1344,
-        432
+        -432,
+        640
       ],
-      "id": "",
-      "name": "search_properties",
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "",
-          "name": "Airtable account"
-        }
-      }
+      "id": "e65a387f-71df-4f12-8991-9484a4abe489",
+      "name": "search_properties"
     },
     {
       "parameters": {
@@ -706,75 +622,141 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2000,
-        624
+        240,
+        672
       ],
-      "id": "",
+      "id": "1211109a-4bfe-45f0-a090-f2e0524e2677",
       "name": "Deduplicate Escalation"
     },
     {
       "parameters": {
         "operation": "send",
-        "phoneNumberId": "",
-        "recipientPhoneNumber": "",
         "textBody": "=⚠️ Agent failed for {{ $('WhatsApp Trigger').item.json.messages[0].from }}. Customer got fallback message.",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        1952,
-        240
+        192,
+        288
       ],
-      "id": "",
+      "id": "80caa553-32f6-4a6a-972f-cf5ec7f1749b",
       "name": "Notify Developer (Error Alert)",
-      "webhookId": "",
-      "credentials": {
-        "whatsAppApi": {
-          "id": "",
-          "name": "WhatsApp account"
-        }
-      }
+      "webhookId": "b136a8f6-ef6e-485b-b217-284dab4413fe"
+    },
+    {
+      "parameters": {
+        "content": "**Real Estate WhatsApp AI Assistant**\nAnswers property questions from a live Airtable database, qualifies leads as hot, warm, or cold, checks calendar availability before booking viewings, and escalates to a human agent when needed. Supports both text and voice messages. Includes error fallback handling and duplicate escalation prevention so nothing breaks or spams the team.",
+        "height": 224,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2016,
+        320
+      ],
+      "id": "016877c1-9259-49e9-b967-288a507ff3a1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "**Setup**\nYou will need credentials for WhatsApp Business Cloud API, Google Gemini, Airtable, Google Calendar, and Google Sheets. Fill in the calendar ID, Airtable base and table, sheet ID, and phone numbers before running this workflow.",
+        "height": 144,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2000,
+        704
+      ],
+      "id": "4a846ccc-8749-484a-bbac-5e016f075145",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "**Input Handling**\nFilters out invalid webhook events, then routes text messages straight through and voice notes through transcription before they reach the agent. Unsupported message types get a simple text-only notice.",
+        "height": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        256
+      ],
+      "id": "6248183e-78ab-43d6-b014-269ffb00f421",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "**Voice Note Handling**\nDownloads the audio file, transcribes it with Gemini, then normalizes the text so it reaches the agent the same way a typed message would."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        560
+      ],
+      "id": "5e0a51a0-0df8-4925-9cfd-d444c336ed72",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "**AI Agent**\nThe core assistant. Runs on Gemini with per customer memory so it remembers the conversation, and a structured output parser so every reply comes back with a lead status the rest of the workflow can act on.",
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        -64
+      ],
+      "id": "cdc675d3-7a16-449d-bdca-0011aa270825",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "**Tools**\nThe agent can look up real properties in Airtable, check real calendar availability, and book viewings. It never invents prices or slots on its own.",
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        784
+      ],
+      "id": "fad4eb16-3e8a-44ea-b78b-519451f12464",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "**Reply and Escalation**\nEvery reply is sent back and logged as a lead. If the lead is hot or needs a human, the agent is notified, with a cooldown so one chatty lead does not trigger repeated alerts."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -32
+      ],
+      "id": "d80c8811-3b94-4c00-abfe-a641616befb8",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "**Error Handling**\nIf the AI agent fails for any reason, the customer still gets a response instead of silence, and the developer is alerted separately so the failure never goes unnoticed.",
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        112
+      ],
+      "id": "2e672051-cba5-4cc9-95a4-e2ba7a216c4d",
+      "name": "Sticky Note7"
     }
   ],
-  "pinData": {
-    "WhatsApp Trigger": [
-      {
-        "json": {
-          "messaging_product": "whatsapp",
-          "metadata": {
-            "display_phone_number": "",
-            "phone_number_id": ""
-          },
-          "contacts": [
-            {
-              "wa_id": "",
-              "user_id": ""
-            }
-          ],
-          "statuses": [
-            {
-              "id": "",
-              "status": "delivered",
-              "timestamp": "1787104230",
-              "recipient_id": "8",
-              "recipient_user_id": "",
-              "pricing": {
-                "billable": false,
-                "pricing_model": "PMP",
-                "category": "service",
-                "type": "free_customer_service"
-              }
-            }
-          ],
-          "field": "messages"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
   "connections": {
     "WhatsApp Trigger": {
       "main": [
@@ -1006,17 +988,40 @@
       ]
     }
   },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+  "pinData": {
+    "WhatsApp Trigger": [
+      {
+        "messaging_product": "whatsapp",
+        "metadata": {
+          "display_phone_number": "",
+          "phone_number_id": ""
+        },
+        "contacts": [
+          {
+            "wa_id": "",
+            "user_id": ""
+          }
+        ],
+        "statuses": [
+          {
+            "id": "",
+            "status": "delivered",
+            "timestamp": "1787104230",
+            "recipient_id": "8",
+            "recipient_user_id": "",
+            "pricing": {
+              "billable": false,
+              "pricing_model": "PMP",
+              "category": "service",
+              "type": "free_customer_service"
+            }
+          }
+        ],
+        "field": "messages"
+      }
+    ]
   },
-  "versionId": "",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": ""
-  },
-  "nodeGroups": [],
-  "id": "",
-  "tags": []
+    "instanceId": "2ea3b31f0e5fe7fe71630f7dffe167993fbebc48d841c38900fca740f7255950"
+  }
 }
