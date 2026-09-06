@@ -11,13 +11,13 @@
           ]
         }
       },
-      "id": "c6a2a687-89b2-4401-9e5e-8d150b3ffaae",
+      "id": "1380a080-8a24-47ce-a420-edcc3e33cbd8",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
       "typeVersion": 1,
       "position": [
-        -1552,
-        656
+        64,
+        704
       ],
       "webhookId": "f7e9cb69-7aaa-4975-8fcc-3f14f578fdde",
       "notesInFlow": false
@@ -33,13 +33,13 @@
           "enableStreaming": false
         }
       },
-      "id": "8efe4ca9-c540-42eb-924b-3ce16943c3e0",
+      "id": "b516f5f2-a23c-4e44-a3fc-90913fb4c3e2",
       "name": "Real Estate Assistant",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -368,
-        208
+        1632,
+        688
       ],
       "retryOnFail": true,
       "onError": "continueErrorOutput"
@@ -51,13 +51,13 @@
           "temperature": 0.3
         }
       },
-      "id": "c3301d12-17c2-4d18-ba20-e231bdd21eb5",
+      "id": "60b46593-cbe3-4a21-8752-0ea55413a86f",
       "name": "Gemini Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        -672,
-        496
+        1680,
+        1184
       ]
     },
     {
@@ -66,13 +66,13 @@
         "sessionKey": "=real-estate-{{ $json.messages[0].from }}",
         "contextWindowLength": 15
       },
-      "id": "440998ff-04cd-4c81-9a84-6cccd4e6e7a2",
+      "id": "93b7dca1-1845-4ca1-8bfd-acc4d0e57b7b",
       "name": "Per-User Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        -448,
-        496
+        1872,
+        1184
       ]
     },
     {
@@ -92,13 +92,13 @@
           "outputFormat": "availability"
         }
       },
-      "id": "0ef1ad2b-2995-49ca-b9bd-6604b4982ec6",
+      "id": "db3133a6-9cab-4672-b7bb-0469496e7f1b",
       "name": "check_availability",
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        -384,
-        912
+        1872,
+        1360
       ]
     },
     {
@@ -119,26 +119,26 @@
           "summary": "={{ $fromAI('Summary', 'Short title for the viewing appointment, e.g., Property Viewing - 123 Main St', 'string') }}"
         }
       },
-      "id": "ec3c884c-429a-47e8-8447-2d4ec40a2783",
+      "id": "fdc28324-8def-4c58-9a28-5dc2ff4b034d",
       "name": "book_appointment",
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        -176,
-        896
+        2080,
+        1360
       ]
     },
     {
       "parameters": {
         "jsonSchemaExample": "{\n  \"reply\": \"Hi! I would be happy to help you find your next home. Are you looking to buy soon, or just exploring the market?\",\n  \"lead_status\": \"WARM\",\n  \"escalate\": false,\n  \"appointment_requested\": false,\n  \"lead_summary\": \"Inquiring about home buying timelines and general property availability.\"\n}"
       },
-      "id": "f97e96f7-17d3-4003-bc35-8a845a10fb81",
+      "id": "43f6cad1-5414-42e9-88cc-9b177bd413a7",
       "name": "Lead Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -48,
-        464
+        2080,
+        1184
       ]
     },
     {
@@ -148,13 +148,13 @@
         "textBody": "={{ $('Real Estate Assistant').item.json.output.reply.replace(/\\\\n|\\n/g, '\\n') }}",
         "additionalFields": {}
       },
-      "id": "e36e2fa9-b60a-44c8-a66c-3ddd69ea8f6e",
+      "id": "519e6400-4c6a-4ea0-8439-16adf9990aaa",
       "name": "Send WhatsApp Reply",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        752,
-        192
+        2400,
+        464
       ],
       "webhookId": "47320f1f-109c-42a0-bd0d-be6b00c1b565"
     },
@@ -275,13 +275,13 @@
         },
         "options": {}
       },
-      "id": "92f75ae8-93fc-4fef-9b53-cf2018658d1b",
+      "id": "fe40ea52-b932-45bc-9b2d-169c0ed1c2d9",
       "name": "Log Lead to Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        592,
-        336
+        2400,
+        640
       ],
       "retryOnFail": true,
       "waitBetweenTries": 3000
@@ -320,13 +320,13 @@
         },
         "options": {}
       },
-      "id": "8b8b2519-aa5b-44d6-8e94-a52edf1a73d0",
+      "id": "61c36ade-16bb-470c-bd00-d05567cd1ea3",
       "name": "Hot Lead or Escalation?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        512,
-        544
+        2400,
+        848
       ]
     },
     {
@@ -335,13 +335,13 @@
         "textBody": "=🚨 *Lead needs attention* ({{ $('Real Estate Assistant').item.json.output.lead_status }})\n\nName:\n{{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}\n\nPhone:\n{{ $('WhatsApp Trigger').item.json.messages[0].from }}\n\nLead Summary:\n{{ $('Real Estate Assistant').item.json.output.lead_summary }}\n\nCustomer Message:\n{{ $('Normalize Input Text').item.json.input_text }}\n\nAppointment Requested:\n{{ $('Real Estate Assistant').item.json.output.appointment_requested }}\n\nAI Reply:\n{{ $('Real Estate Assistant').item.json.output.reply }}",
         "additionalFields": {}
       },
-      "id": "1052fcb2-6b13-4c94-a73b-a3156adddfc2",
+      "id": "5e765839-a14b-40b6-83d0-4086c5840933",
       "name": "Notify Agent (Escalation)",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        1008,
-        528
+        2960,
+        848
       ],
       "webhookId": "9a6a887a-c379-431d-bfb9-f70f0b3e830f"
     },
@@ -352,13 +352,13 @@
         "textBody": "Thanks for your message! I can currently help best over text. Please type your question and I will assist you right away. 🏡",
         "additionalFields": {}
       },
-      "id": "29db35cb-494d-4ef8-b80a-8f395599fa91",
+      "id": "08c5cc90-5914-48e2-aacd-c398c6dd68fd",
       "name": "Send Unsupported Notice",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        -1040,
-        928
+        832,
+        448
       ],
       "webhookId": "74df8bac-ffed-464b-bac7-1de26ce0ca8c"
     },
@@ -371,10 +371,10 @@
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        -880,
-        640
+        576,
+        992
       ],
-      "id": "209af35a-b536-4059-9b53-107b0aa90ee6",
+      "id": "8ecf9720-fed8-4788-aa4d-951fbc106ced",
       "name": "Get Audio File",
       "webhookId": "0bdaf334-3403-4aa4-ba1e-23ce19f29028"
     },
@@ -396,10 +396,10 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.2,
       "position": [
-        -576,
-        832
+        1104,
+        992
       ],
-      "id": "65ac7219-1921-4c45-af37-a13112f3c87e",
+      "id": "b49961de-b23d-4b70-94dd-4fb73b0fe18e",
       "name": "Analyze audio"
     },
     {
@@ -430,10 +430,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1328,
-        656
+        320,
+        704
       ],
-      "id": "ccc564e8-9ac7-4ae4-8cd9-429ad1e5409d",
+      "id": "505ce9a0-d559-44fa-95e5-2299de620224",
       "name": "Is Valid Message?"
     },
     {
@@ -494,10 +494,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        -1104,
-        624
+        576,
+        704
       ],
-      "id": "b15b64b8-c737-4a4d-a1cd-f4c437438d0a",
+      "id": "08298800-9c81-424e-904d-a2ebe3a28a7e",
       "name": "Route by Message Type"
     },
     {
@@ -517,10 +517,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        -752,
-        208
+        1360,
+        704
       ],
-      "id": "9f09ba2e-44cb-4140-acb1-7c3c32d28aea",
+      "id": "71dcbd76-0259-473f-90f0-2f891cec9de9",
       "name": "Normalize Input Text"
     },
     {
@@ -540,10 +540,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        352,
-        896
+        2400,
+        1120
       ],
-      "id": "64b9795c-fc88-494c-b5b6-bb083add8d66",
+      "id": "f7afb5f8-a90b-47a3-b604-083d95d02a5c",
       "name": "Fallback Reply Text"
     },
     {
@@ -556,10 +556,10 @@
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        864,
-        896
+        2960,
+        1120
       ],
-      "id": "6e0bef8b-0d75-4fd5-9c85-022abe7ddfdf",
+      "id": "20999446-3c29-45a5-a277-0aa08d55b471",
       "name": "Send Fallback Reply to Customer",
       "webhookId": "e6842598-c129-4c6b-9c27-c5486aff794b"
     },
@@ -579,10 +579,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        -768,
-        832
+        832,
+        992
       ],
-      "id": "3cff2b17-e618-4b5e-8323-84abfddad3e9",
+      "id": "04de4420-7f6a-40af-8fa1-c568cd8b3236",
       "name": "Download Audio Binary"
     },
     {
@@ -609,10 +609,10 @@
       "type": "n8n-nodes-base.airtableTool",
       "typeVersion": 2.2,
       "position": [
-        32,
-        896
+        1680,
+        1360
       ],
-      "id": "3bfc6fc6-20d7-42fd-94e0-7783b0f9b12c",
+      "id": "1f4d1e7c-b3a2-464b-a1d9-7c32d475ab1d",
       "name": "search_properties"
     },
     {
@@ -622,10 +622,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        768,
-        528
+        2672,
+        848
       ],
-      "id": "78d4fe52-6c0c-4ba4-ae39-a1f14acb8dcf",
+      "id": "5d425be4-2d7b-47a6-9dd6-95417766fcae",
       "name": "Deduplicate Escalation"
     },
     {
@@ -637,122 +637,122 @@
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        624,
-        896
+        2672,
+        1120
       ],
-      "id": "19e696de-5c09-48eb-bfe8-2ea930c1c1d2",
+      "id": "97f48896-ae6f-401d-9813-5cd91297a0e3",
       "name": "Notify Developer (Error Alert)",
       "webhookId": "b136a8f6-ef6e-485b-b217-284dab4413fe"
     },
     {
       "parameters": {
         "content": "## Input & Routing\nFilters invalid webhook events, then routes text and voice messages before they reach the agent.",
-        "height": 96,
-        "width": 288,
+        "height": 510,
+        "width": 1050,
         "color": "#4A90D9"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1280,
-        512
+        16,
+        368
       ],
-      "id": "890a15e2-659e-4c0f-8952-4e7095ada4fc",
+      "id": "3707c531-eb4c-4c8b-8589-a9b9917f5aa0",
       "name": "Sticky Note"
     },
     {
       "parameters": {
         "content": "## Real Estate WhatsApp AI Assistant\n\n**Who it's for**\nReal estate agencies handling property enquiries over WhatsApp.\n\n**What it does**\nAnswers property questions from a live Airtable database, qualifies leads as hot, warm, or cold, checks calendar availability before booking viewings, and escalates to a human agent when needed.\n\n**How it works**\n1. Customer sends a text or voice message on WhatsApp\n2. Voice notes are transcribed before reaching the agent\n3. The AI agent looks up real property data and calendar availability\n4. A structured reply is sent back and the lead is logged\n5. Hot leads or failures trigger a notification to the team\n\n**How to use**\nAdd your WhatsApp, Gemini, Airtable, Calendar, and Sheets credentials, then activate the workflow.",
-        "height": 576,
-        "width": 448
+        "height": 444,
+        "width": 1770
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1760,
-        48
+        16,
+        -128
       ],
-      "id": "7f53ea6d-1532-4c13-a6af-2585e5d51bfb",
+      "id": "4183167c-a9a4-4253-a57e-237e22930d6b",
       "name": "Sticky Note1"
     },
     {
       "parameters": {
         "content": "## Reply and Escalation\nSends the reply, logs the lead, and notifies the team for hot leads with duplicate protection.",
-        "height": 128,
-        "width": 368,
+        "height": 642,
+        "width": 830,
         "color": "#C9A227"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        80,
-        208
+        2352,
+        352
       ],
-      "id": "34a64392-0c42-41e4-91c2-83951e67fa14",
+      "id": "19cda7d5-2fc2-4416-9672-0ab8ca15dfca",
       "name": "Sticky Note2"
     },
     {
       "parameters": {
         "content": "## Voice Note Handling\nDownloads and transcribes voice notes with Gemini before they reach the agent.",
-        "height": 128,
-        "width": 272,
+        "height": 236,
+        "width": 790,
         "color": "#4C8577"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -752,
-        688
+        544,
+        912
       ],
-      "id": "56bc8024-c364-4695-b5ca-0ac6e583414d",
+      "id": "bacc1f06-80bd-410f-9082-4e24eda1179d",
       "name": "Sticky Note3"
     },
     {
       "parameters": {
         "content": "## AI Agent\nThe core assistant. Runs on Gemini with per customer memory and a structured output parser.",
-        "height": 96,
-        "width": 416,
+        "height": 250,
+        "width": 494,
         "color": "#8B6D88"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -464,
-        96
+        1552,
+        560
       ],
-      "id": "10f0c029-039e-4d53-944f-f312e212ec0c",
+      "id": "8979669a-8b60-4497-92d5-e09f8b5c1e93",
       "name": "Sticky Note4"
     },
     {
       "parameters": {
         "content": "## Tools\nThe agent can search real properties, check calendar availability, and book viewings. It never invents data.",
-        "height": 128,
-        "width": 416,
+        "height": 464,
+        "width": 670,
         "color": "#5FA85D"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -352,
-        656
+        1632,
+        1040
       ],
-      "id": "ff9e3bf4-cd33-43e0-9125-8f9c85123f04",
+      "id": "86d12724-154b-4224-a13f-28e370775267",
       "name": "Sticky Note5"
     },
     {
       "parameters": {
         "content": "## Error Handling\nIf the AI agent fails, the customer still gets a reply and the developer is alerted separately.",
-        "height": 128,
-        "width": 592,
+        "height": 252,
+        "width": 830,
         "color": "#C25450"
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        368,
-        752
+        2368,
+        1040
       ],
-      "id": "94fc2f57-e280-4cb7-9903-9e4067eb274d",
+      "id": "bdf99b6a-b47a-446b-b9b4-7fa502a208fa",
       "name": "Sticky Note6"
     }
   ],
